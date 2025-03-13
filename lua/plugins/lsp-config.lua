@@ -22,13 +22,20 @@ return {
 			local capabilities = require("cmp_nvim_lsp").default_capabilities()
 			local lspconfig = require("lspconfig")
 			lspconfig.lua_ls.setup({ capabilities = capabilities })
-			lspconfig.clangd.setup({ capabilities = capabilities })
+			lspconfig.clangd.setup{ capabilities = capabilities, init_options={compilationDatabasePath='./build'} }
+			lspconfig.gopls.setup({ capabilities = capabilities })
+			lspconfig.zls.setup({ capabilities = capabilities })
 			lspconfig.pyright.setup({ capabilities = capabilities })
+
 			lspconfig.rust_analyzer.setup({
-				capabilities = capabilities,
 				-- Server-specific settings. See `:help lspconfig-setup`
 				settings = {
-					["rust-analyzer"] = {},
+					["rust-analyzer"] = {
+
+						diagnostics = {
+							enable = false,
+						},
+					},
 				},
 			})
 			vim.keymap.set("n", "K", vim.lsp.buf.hover, {})

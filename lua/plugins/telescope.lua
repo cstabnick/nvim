@@ -6,8 +6,8 @@ return
 local builtin = require("telescope.builtin")
 
 vim.keymap.set('n', '<C-p>', builtin.find_files, {})
-vim.keymap.set('n', '<leader>fg', builtin.live_grep, {})
-        end 
+vim.keymap.set('n', '<leader>fw', builtin.live_grep, {})
+        end
     },
 
 {
@@ -39,7 +39,7 @@ vim.keymap.set('n', '<leader>fg', builtin.live_grep, {})
 -- To get ui-select loaded and working with telescope, you need to call
 -- load_extension, somewhere after setup function:
 require("telescope").load_extension("ui-select")
-    end 
+    end
 }
 
     }
