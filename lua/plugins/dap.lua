@@ -45,35 +45,17 @@ return {
 		dependencies = { "mfussenegger/nvim-dap" },
 		ft = "python",
 		config = function()
-			-- Find a Python interpreter that has debugpy installed.
-			--
-			-- Resolution order:
-			--   1. A .venv in the current working directory (project-local uv venv)
-			--   2. The uv tool venv for debugpy (global fallback)
-			--      Install with: uv tool install debugpy
-			local function find_python()
-				-- 1. Project-local .venv (standard uv project layout)
-				local cwd_venv = vim.fn.getcwd() .. "/.venv/bin/python"
-				if vim.fn.executable(cwd_venv) == 1 then
-					return cwd_venv
-				end
-
-				-- 2. uv tool install debugpy
-				local uv_tool_python = vim.fn.expand("~/.local/share/uv/tools/debugpy/bin/python")
-				if vim.fn.executable(uv_tool_python) == 1 then
-					return uv_tool_python
-				end
-
+			-- Use the uv tool Python for the debugpy adapter (it has debugpy installed).
+			-- nvim-dap-python detects the project's virtualenv separately for running code.
+			-- Install with: uv tool install debugpy
+			local uv_tool_python = vim.fn.expand("~/.local/share/uv/tools/debugpy/bin/python")
+			if vim.fn.executable(uv_tool_python) == 1 then
+				require("dap-python").setup(uv_tool_python)
+			else
 				vim.notify(
-					"nvim-dap-python: no Python with debugpy found.\nRun: uv tool install debugpy",
+					"nvim-dap-python: debugpy not found.\nRun: uv tool install debugpy",
 					vim.log.levels.ERROR
 				)
-				return nil
-			end
-
-			local python = find_python()
-			if python then
-				require("dap-python").setup(python)
 			end
 		end,
 	},
