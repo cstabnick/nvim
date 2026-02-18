@@ -1,17 +1,5 @@
 return {
-	{
-		"jay-babu/mason-nvim-dap.nvim",
-		dependencies = { "williamboman/mason.nvim" },
-		config = function()
-			require("mason-nvim-dap").setup({
-				ensure_installed = { "debugpy" },
-				handlers = {},
-			})
-		end,
-	},
-	{
-		"nvim-neotest/nvim-nio",
-	},
+	{ "nvim-neotest/nvim-nio" },
 	{
 		"rcarriga/nvim-dap-ui",
 		dependencies = { "mfussenegger/nvim-dap", "nvim-neotest/nvim-nio" },
@@ -57,9 +45,36 @@ return {
 		dependencies = { "mfussenegger/nvim-dap" },
 		ft = "python",
 		config = function()
-			-- Uses the debugpy installed by mason
-			local debugpy_path = vim.fn.stdpath("data") .. "/mason/packages/debugpy/venv/bin/python"
-			require("dap-python").setup(debugpy_path)
+			-- Find a Python interpreter that has debugpy installed.
+			--
+			-- Resolution order:
+			--   1. A .venv in the current working directory (project-local uv venv)
+			--   2. The uv tool venv for debugpy (global fallback)
+			--      Install with: uv tool install debugpy
+			local function find_python()
+				-- 1. Project-local .venv (standard uv project layout)
+				local cwd_venv = vim.fn.getcwd() .. "/.venv/bin/python"
+				if vim.fn.executable(cwd_venv) == 1 then
+					return cwd_venv
+				end
+
+				-- 2. uv tool install debugpy
+				local uv_tool_python = vim.fn.expand("~/.local/share/uv/tools/debugpy/bin/python")
+				if vim.fn.executable(uv_tool_python) == 1 then
+					return uv_tool_python
+				end
+
+				vim.notify(
+					"nvim-dap-python: no Python with debugpy found.\nRun: uv tool install debugpy",
+					vim.log.levels.ERROR
+				)
+				return nil
+			end
+
+			local python = find_python()
+			if python then
+				require("dap-python").setup(python)
+			end
 		end,
 	},
 }
