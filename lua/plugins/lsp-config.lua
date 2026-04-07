@@ -20,38 +20,41 @@ return {
 		"neovim/nvim-lspconfig",
 
 		config = function()
-			local capabilities = require("cmp_nvim_lsp").default_capabilities()
-			local lspconfig = require("lspconfig")
-			lspconfig.lua_ls.setup({ capabilities = capabilities })
-			lspconfig.clangd.setup{ capabilities = capabilities, init_options={compilationDatabasePath='./build'} }
-			lspconfig.gopls.setup({ capabilities = capabilities })
-			lspconfig.zls.setup({ capabilities = capabilities })
-			lspconfig.pyright.setup({ capabilities = capabilities })
+			vim.lsp.config("*", {
+				capabilities = require("cmp_nvim_lsp").default_capabilities(),
+			})
 
-			lspconfig.rust_analyzer.setup({
-				-- Server-specific settings. See `:help lspconfig-setup`
+			vim.lsp.config("clangd", {
+				init_options = { compilationDatabasePath = "./build" },
+			})
+
+			vim.lsp.config("rust_analyzer", {
 				settings = {
 					["rust-analyzer"] = {
-
 						diagnostics = {
 							enable = false,
 						},
 					},
 				},
 			})
-			vim.keymap.set("n", "K", vim.lsp.buf.hover, {})
 
-			local opts = { buffer = bufnr, noremap = true, silent = true }
-			vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
-			vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
-			vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
-			vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
-			vim.keymap.set("n", "<space>e", vim.diagnostic.open_float, opts)
-			vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, opts)
-			vim.keymap.set("n", "]d", vim.diagnostic.goto_next, opts)
-			vim.keymap.set("n", "gi", vim.lsp.buf.implementation, opts)
-			vim.keymap.set({ "n", "v" }, "<space>ca", vim.lsp.buf.code_action, opts)
-			vim.keymap.set("n", "<space>fm", vim.lsp.buf.format, opts)
+			vim.lsp.enable({ "lua_ls", "clangd", "gopls", "zls", "pyright", "rust_analyzer" })
+
+			vim.api.nvim_create_autocmd("LspAttach", {
+				callback = function(args)
+					local opts = { buffer = args.buf, noremap = true, silent = true }
+					vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
+					vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
+					vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
+					vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
+					vim.keymap.set("n", "<space>e", vim.diagnostic.open_float, opts)
+					vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, opts)
+					vim.keymap.set("n", "]d", vim.diagnostic.goto_next, opts)
+					vim.keymap.set("n", "gi", vim.lsp.buf.implementation, opts)
+					vim.keymap.set({ "n", "v" }, "<space>ca", vim.lsp.buf.code_action, opts)
+					vim.keymap.set("n", "<space>fm", vim.lsp.buf.format, opts)
+				end,
+			})
 		end,
 	},
 }
